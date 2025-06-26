@@ -14,6 +14,7 @@ if [ -z "$1" ]; then
   echo "❌ ERROR: No authentication key provided."
   usage
 fi
+
 AUTH_KEY="$1"
 
 # Step 2: Install Tailscale from official source
