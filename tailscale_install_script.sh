@@ -56,6 +56,6 @@ sudo systemctl start tailscaled-userspace
 
 # Step 6: Log in using the provided auth key
 echo "🚀 Connecting to Tailscale using the specified auth key..."
-sudo tailscale up --authkey="$AUTH_KEY" --reset
+sudo tailscale up --authkey="$AUTH_KEY" --reset --hostname=ap-ollama-tailscale
 
 echo "🎉 Tailscale setup complete via userspace mode."
