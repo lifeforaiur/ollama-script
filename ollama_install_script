@@ -11,7 +11,5 @@ echo 'Environment="OLLAMA_KEEP_ALIVE=-1"' >>/etc/systemd/system/ollama.service.d
 systemctl daemon-reload && \
 systemctl restart ollama && \
 sleep 3 && \
-ollama pull qwen3:32b-q4_K_M && \
-ollama pull mistral-small3.2 && \
-ollama pull hf.co/bartowski/DeepSeek-R1-Distill-Qwen-32B-abliterated-GGUF:Q4_K_M && \
+ollama pull deepseek-r1:70b && \
 ollama pull qwen2.5-coder:32b
