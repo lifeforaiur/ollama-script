@@ -12,4 +12,4 @@ systemctl daemon-reload && \
 systemctl restart ollama && \
 sleep 3 && \
 ollama pull deepseek-r1:70b && \
-ollama run hf.co/unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_M
+ollama pull hf.co/unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_M
