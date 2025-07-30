@@ -11,5 +11,5 @@ echo 'Environment="OLLAMA_KEEP_ALIVE=-1"' >>/etc/systemd/system/ollama.service.d
 systemctl daemon-reload && \
 systemctl restart ollama && \
 sleep 3 && \
-ollama pull qwen2.5-coder:32b-instruct-q6_K && \
-ollama pull hf.co/unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q6_K
+ollama pull qwen2.5-coder:32b-instruct-q4_K_M && \
+ollama pull hf.co/unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_M
