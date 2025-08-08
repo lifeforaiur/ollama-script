@@ -13,4 +13,5 @@ systemctl restart ollama && \
 sleep 3 && \
 ollama pull hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-1M-GGUF:Q5_K_XL && \
 ollama pull hf.co/unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q5_K_M && \
-ollama pull hf.co/bartowski/nvidia_Llama-3.1-8B-UltraLong-1M-Instruct-GGUF:Q6_K
+ollama pull hf.co/bartowski/nvidia_Llama-3.1-8B-UltraLong-1M-Instruct-GGUF:Q6_K && \
+ollama run hf.co/mradermacher/Qwen3-30B-A6B-16-Extreme-GGUF:Q4_K_M
