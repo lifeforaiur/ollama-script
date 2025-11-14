@@ -13,5 +13,5 @@ systemctl restart ollama && \
 sleep 3 && \
 ollama pull hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:Q8_K_XL && \
 ollama pull hf.co/unsloth/Qwen3-30B-A3B-Thinking-2507-GGUF:Q8_K_XL && \
-ollama pull hf.co/unsloth/GLM-4.5-Air-GGUF:Q4_K_M && \
+ollama pull hf.co/bartowski/zai-org_GLM-4.5-Air-GGUF:Q4_K_M && \
 ollama pull gpt-oss:120b
