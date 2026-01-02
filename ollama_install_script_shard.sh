@@ -23,11 +23,9 @@ systemctl daemon-reload
 systemctl restart ollama
 sleep 3
 
-# Pull default model
-ollama_hf_pull gpt-oss:120b
-ollama_hf_pull 'unsloth/GLM-4.5-Air-GGUF:Q4_K_M' 'glm4.5-Q4'"
-
-# Main function to download HF model with automatic shard detection
+# ============================================
+# Define ollama_hf_pull function FIRST
+# ============================================
 ollama_hf_pull() {
     local hf_model="$1"  # Format: unsloth/GLM-4.5-Air-GGUF:Q4_K_M
     local model_alias="$2"  # Optional: custom name for ollama
@@ -97,11 +95,7 @@ def main():
         is_sharded = False
         shard_pattern_detected = False
         
-        # Check for shard patterns:
-        # Pattern 1: -00001-of-00002.gguf
-        # Pattern 2: .gguf.part1, .gguf.part2
-        # Pattern 3: -split-a.gguf, -split-b.gguf
-        
+        # Check for shard patterns
         shard_indicators = ['-of-', '.part', '-split-']
         for indicator in shard_indicators:
             if any(indicator in f for f in gguf_files):
@@ -121,20 +115,17 @@ def main():
         else:
             # Multiple files but no shard pattern - pick the best one
             is_sharded = False
-            # Prefer file with quantization in name, or largest file
             if quant:
                 best_match = [f for f in gguf_files if quant.upper() in f.upper()]
                 if best_match:
                     gguf_files = [best_match[0]]
             else:
-                # Just use the first one (they're sorted)
                 gguf_files = [gguf_files[0]]
-            print(f"      ✓ SINGLE FILE MODEL (selected from {len(all_files)} options)")
+            print(f"      ✓ SINGLE FILE MODEL (selected from multiple options)")
             print(f"        - {gguf_files[0]}")
         
         # Handle based on detection
         if is_sharded:
-            # Download all shards and merge
             print(f"\n[3/5] Downloading {len(gguf_files)} shard files...")
             
             downloaded_paths = []
@@ -150,7 +141,6 @@ def main():
                     local_dir_use_symlinks=False
                 )
                 
-                # Determine actual path
                 actual_path = download_dir / gguf_file
                 if actual_path.exists():
                     downloaded_paths.append(actual_path)
@@ -161,7 +151,6 @@ def main():
                 total_download_size += file_size
                 print(f"             Downloaded: {file_size / (1024**3):.2f} GB")
             
-            # Sort paths to ensure correct merge order
             downloaded_paths = sorted(downloaded_paths, key=lambda p: str(p))
             
             print(f"\n[4/5] Merging {len(downloaded_paths)} shards...")
@@ -170,19 +159,16 @@ def main():
             
             with open(merged_path, 'wb') as outfile:
                 for i, shard_path in enumerate(downloaded_paths):
-                    shard_size = shard_path.stat().st_size
                     print(f"      [{i+1}/{len(downloaded_paths)}] Merging {shard_path.name}...")
                     
                     with open(shard_path, 'rb') as infile:
-                        while chunk := infile.read(100 * 1024 * 1024):  # 100MB chunks
+                        while chunk := infile.read(100 * 1024 * 1024):
                             outfile.write(chunk)
             
-            # Cleanup shard files
             print(f"      Cleaning up shard files...")
             for shard_path in downloaded_paths:
                 shard_path.unlink()
             
-            # Try to remove empty directories
             try:
                 for dirpath in sorted(download_dir.rglob('*'), reverse=True):
                     if dirpath.is_dir():
@@ -194,7 +180,6 @@ def main():
             print(f"      ✓ Merge complete!")
             
         else:
-            # Single file - direct download
             print(f"\n[3/5] Downloading single file...")
             
             gguf_file = gguf_files[0]
@@ -207,7 +192,6 @@ def main():
                 local_dir_use_symlinks=False
             )
             
-            # Move to final location
             actual_path = download_dir / gguf_file
             source_path = actual_path if actual_path.exists() else Path(local_path)
             
@@ -216,7 +200,6 @@ def main():
             import shutil
             shutil.move(str(source_path), str(merged_path))
             
-            # Cleanup
             try:
                 for dirpath in sorted(download_dir.rglob('*'), reverse=True):
                     if dirpath.is_dir():
@@ -249,7 +232,6 @@ PARAMETER num_ctx 4096
         with open(modelfile_path, 'w') as f:
             f.write(modelfile_content)
         
-        # Create model in Ollama
         print(f"      Running: ollama create {model_name}")
         result = subprocess.run(
             ['ollama', 'create', model_name, '-f', str(modelfile_path)],
@@ -270,13 +252,11 @@ PARAMETER num_ctx 4096
         print(f"  ollama run {model_name}")
         print(f"")
         
-        # Show model list
         subprocess.run(['ollama', 'list'])
         
-        # Ask about cleanup
-        print(f"\n[Optional] The GGUF file is stored at: {merged_path}")
+        print(f"\n[Optional] GGUF file stored at: {merged_path}")
         print(f"           Size: {final_size / (1024**3):.2f} GB")
-        print(f"           You can delete it with: rm {merged_path}")
+        print(f"           Delete with: rm {merged_path}")
         
     except Exception as e:
         print(f"\nError: {e}")
@@ -300,6 +280,12 @@ PYSCRIPT
 # Export function for use in interactive shell
 export -f ollama_hf_pull
 
+# ============================================
+# NOW call the function AFTER it's defined
+# ============================================
+ollama_hf_pull "unsloth/GLM-4.5-Air-GGUF:Q4_K_M" "GLM-4.5-Air-GGUF:Q4_K_M"
+ollama_hf_pull "gpt-oss:120b" "gpt-oss:120b"
+
 echo ""
 echo "========================================"
 echo "Setup complete!"
@@ -313,11 +299,7 @@ echo "Examples:"
 echo ""
 echo "  # Sharded model (auto-detected and merged):"
 echo "  ollama_hf_pull 'unsloth/GLM-4.5-Air-GGUF:Q4_K_M'"
-echo "  ollama_hf_pull 'unsloth/GLM-4.5-Air-GGUF:Q4_K_M' 'glm4'"
 echo ""
-echo "  # Single file model (auto-detected):"
+echo "  # Single file model:"
 echo "  ollama_hf_pull 'TheBloke/Llama-2-7B-GGUF:Q4_K_M' 'llama2-7b'"
-echo ""
-echo "  # Without quantization (uses first available):"
-echo "  ollama_hf_pull 'unsloth/gemma-3-4b-it-GGUF'"
 echo ""
