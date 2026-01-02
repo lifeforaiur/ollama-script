@@ -283,8 +283,8 @@ export -f ollama_hf_pull
 # ============================================
 # NOW call the function AFTER it's defined
 # ============================================
-ollama_hf_pull "unsloth/GLM-4.5-Air-GGUF:Q4_K_M" "GLM-4.5-Air-GGUF:Q4_K_M"
-ollama_hf_pull "ollama run hf.co/unsloth/gpt-oss-120b-GGUF:Q4_K_M" "gpt-oss:120b"
+#ollama_hf_pull "unsloth/GLM-4.5-Air-GGUF:Q4_K_M" "GLM-4.5-Air-GGUF:Q4_K_M"
+ollama_hf_pull "unsloth/gpt-oss-120b-GGUF:Q4_K_M" "gpt-oss:120b"
 
 echo ""
 echo "========================================"
