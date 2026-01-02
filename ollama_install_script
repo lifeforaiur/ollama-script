@@ -11,6 +11,4 @@ echo 'Environment="OLLAMA_KEEP_ALIVE=-1"' >>/etc/systemd/system/ollama.service.d
 systemctl daemon-reload && \
 systemctl restart ollama && \
 sleep 3 && \
-ollama pull hf.co/unsloth/GLM-4.5-Air-GGUF:Q4_K_M && \
-ollama pull hf.co/bartowski/zai-org_GLM-4.6V-GGUF:Q4_K_M && \
 ollama pull gpt-oss:120b
