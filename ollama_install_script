@@ -11,4 +11,6 @@ echo 'Environment="OLLAMA_KEEP_ALIVE=-1"' >>/etc/systemd/system/ollama.service.d
 systemctl daemon-reload && \
 systemctl restart ollama && \
 sleep 3 && \
-ollama pull gpt-oss:120b
+ollama pull gpt-oss:120b && \
+ollama pull hf.co/unsloth/Qwen3-Next-80B-A3B-Thinking-GGUF:Q4_K_M && \
+ollama pull hf.co/unsloth/Nemotron-3-Nano-30B-A3B-GGUF:Q4_K_M
