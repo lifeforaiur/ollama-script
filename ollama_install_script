@@ -11,7 +11,4 @@ echo 'Environment="OLLAMA_KEEP_ALIVE=-1"' >>/etc/systemd/system/ollama.service.d
 systemctl daemon-reload && \
 systemctl restart ollama && \
 sleep 3 && \
-ollama pull gpt-oss:120b && \
-ollama pull deepseek-r1:70b && \
-ollama pull qwen3-next && \
-ollama pull huihui_ai/qwen3-next-abliterated
+ollama pull gpt-oss:120b
