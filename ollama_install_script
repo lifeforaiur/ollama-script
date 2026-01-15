@@ -2,7 +2,7 @@
 set -e  # Exit on error
 
 sudo apt update && \
-sudo apt install -y pciutils nano htop nvtop && \
+sudo apt install -y pciutils nano htop nvtop zstd && \
 curl https://ollama.ai/install.sh | sh && \
 mkdir -p /etc/systemd/system/ollama.service.d && \
 echo '[Service]' >/etc/systemd/system/ollama.service.d/environment.conf && \
