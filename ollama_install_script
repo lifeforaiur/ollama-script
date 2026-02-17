@@ -10,9 +10,16 @@ cat > /etc/systemd/system/ollama.service.d/environment.conf << 'EOF'
 Environment="OLLAMA_HOST=0.0.0.0:11434"
 Environment="OLLAMA_KEEP_ALIVE=-1"
 Environment="OLLAMA_NUM_CTX=131072"
+Environment="OLLAMA_NUM_GPU=-1"
+Environment="OLLAMA_GPU_MEMORY_FRACTION=0.9"
+Environment="OLLAMA_MAX_CONCURRENT_REQUESTS=8"
+Environment="OLLAMA_TENSOR_PARALLEL=true"
 EOF
 systemctl daemon-reload && \
 systemctl restart ollama && \
 sleep 3 && \
-ollama pull gpt-oss:120b && \
-ollama pull gpt-oss:20b
+##ollama pull gpt-oss:120b && \
+ollama pull gpt-oss:20b && \
+ollama pull devstral-small-2:24b-instruct-2512-q8_0 && \
+ollama pull glm-4.7-flash:q8_0 && \
+ollama pull qwen3-coder:30b-a3b-q8_0
