@@ -12,7 +12,6 @@ Environment="OLLAMA_KEEP_ALIVE=-1"
 Environment="OLLAMA_NUM_CTX=131072"
 Environment="OLLAMA_NUM_GPU=-1"
 Environment="OLLAMA_GPU_MEMORY_FRACTION=0.9"
-Environment="OLLAMA_MAX_CONCURRENT_REQUESTS=8"
 Environment="OLLAMA_TENSOR_PARALLEL=true"
 EOF'
 sudo systemctl daemon-reload && \
