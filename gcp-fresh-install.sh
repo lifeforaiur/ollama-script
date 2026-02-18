@@ -6,16 +6,19 @@ set -e
 echo "--- Starting System Setup ---"
 
 # 1. Swap File Creation (50GB)
+# Improved Swap Logic
 if [ ! -f /swapfile ]; then
-    echo "Creating 50G swap file..."
-    sudo fallocate -l 50G /swapfile
+    echo "Attempting to create 50G swap file..."
+    # dd is slower but more compatible than fallocate on some filesystems
+    sudo dd if=/dev/zero of=/swapfile bs=1M count=51200 status=progress
     sudo chmod 600 /swapfile
     sudo mkswap /swapfile
-    sudo swapon /swapfile
-    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-    grep SwapTotal /proc/meminfo
-else
-    echo "Swapfile already exists, skipping."
+    if sudo swapon /swapfile; then
+        echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+        echo "Swap enabled successfully."
+    else
+        echo "ERROR: swapon failed. You may be in a container (LXC/OpenVZ) that doesn't allow swap."
+    fi
 fi
 
 # 2. Update and Install Base Software
