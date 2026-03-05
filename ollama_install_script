@@ -17,4 +17,4 @@ EOF'
 sudo systemctl daemon-reload && \
 sudo systemctl restart ollama && \
 sleep 3 && \
-ollama pull hf.co/unsloth/Qwen3.5-35B-A3B-GGUF:UD-Q4_K_XL
+ollama pull hf.co/unsloth/Qwen3.5-35B-A3B-GGUF:Q4_K_M
