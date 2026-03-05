@@ -61,20 +61,25 @@ sudo systemctl start tailscaled-userspace
 
 HOSTNAME="ap-ollama-tailscale"
 
-# Step 6: Delete existing Tailscale node with same hostname (if API key provided)
+# Step 6: Delete existing Tailscale node(s) with same hostname (if API key provided)
 if [ -n "$API_KEY" ]; then
   echo "🔍 Checking for existing Tailscale node with hostname '$HOSTNAME'..."
   DEVICES=$(curl -sf -u "${API_KEY}:" "https://api.tailscale.com/api/v2/tailnet/-/devices" || true)
   if [ -n "$DEVICES" ]; then
-    DEVICE_ID=$(echo "$DEVICES" | grep -o '"id":"[^"]*","addresses"[^}]*"hostname":"'"$HOSTNAME"'"' | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"//;s/"//')
-    # Fallback: use jq if available
-    if [ -z "$DEVICE_ID" ] && command -v jq &>/dev/null; then
-      DEVICE_ID=$(echo "$DEVICES" | jq -r ".devices[] | select(.hostname == \"$HOSTNAME\") | .id" | head -1)
-    fi
-    if [ -n "$DEVICE_ID" ]; then
-      echo "🗑️  Deleting existing node '$HOSTNAME' (ID: $DEVICE_ID)..."
-      curl -sf -X DELETE -u "${API_KEY}:" "https://api.tailscale.com/api/v2/device/${DEVICE_ID}"
-      echo "✅ Existing node deleted."
+    # Use python3 for reliable JSON parsing (available on all Ubuntu installs)
+    DEVICE_IDS=$(echo "$DEVICES" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for d in data.get('devices', []):
+    if d.get('hostname') == '$HOSTNAME':
+        print(d['id'])
+" 2>/dev/null || true)
+    if [ -n "$DEVICE_IDS" ]; then
+      echo "$DEVICE_IDS" | while read -r DEVICE_ID; do
+        echo "🗑️  Deleting existing node '$HOSTNAME' (ID: $DEVICE_ID)..."
+        curl -sf -X DELETE -u "${API_KEY}:" "https://api.tailscale.com/api/v2/device/${DEVICE_ID}" || true
+        echo "✅ Node $DEVICE_ID deleted."
+      done
     else
       echo "ℹ️  No existing node found with hostname '$HOSTNAME'."
     fi
