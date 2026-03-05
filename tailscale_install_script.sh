@@ -3,9 +3,13 @@ set -e  # Exit on error
 
 # Helper: Print usage message
 usage() {
-  echo "Usage: $0 <Tailscale Auth Key>"
+  echo "Usage: $0 <Tailscale Auth Key> [Tailscale API Key]"
   echo
-  echo "Example: $0 tskey-auth-<YOUR_KEY>"
+  echo "Example: $0 tskey-auth-<YOUR_KEY> tskey-api-<YOUR_API_KEY>"
+  echo
+  echo "  Tailscale Auth Key: required, used to authenticate the node"
+  echo "  Tailscale API Key:  optional, used to delete an existing node with the same hostname"
+  echo "                      Can also be set via TS_API_KEY environment variable"
   exit 1
 }
 
@@ -16,6 +20,7 @@ if [ -z "$1" ]; then
 fi
 
 AUTH_KEY="$1"
+API_KEY="${2:-$TS_API_KEY}"
 
 # Step 2: Install Tailscale from official source
 echo "🔧 Installing Tailscale..."
@@ -54,8 +59,32 @@ echo "✅ Enabling and starting userspace Tailscale service..."
 sudo systemctl enable tailscaled-userspace
 sudo systemctl start tailscaled-userspace
 
-# Step 6: Log in using the provided auth key
+HOSTNAME="ap-ollama-tailscale"
+
+# Step 6: Delete existing Tailscale node with same hostname (if API key provided)
+if [ -n "$API_KEY" ]; then
+  echo "🔍 Checking for existing Tailscale node with hostname '$HOSTNAME'..."
+  DEVICES=$(curl -sf -u "${API_KEY}:" "https://api.tailscale.com/api/v2/tailnet/-/devices" || true)
+  if [ -n "$DEVICES" ]; then
+    DEVICE_ID=$(echo "$DEVICES" | grep -o '"id":"[^"]*","addresses"[^}]*"hostname":"'"$HOSTNAME"'"' | grep -o '"id":"[^"]*"' | head -1 | sed 's/"id":"//;s/"//')
+    # Fallback: use jq if available
+    if [ -z "$DEVICE_ID" ] && command -v jq &>/dev/null; then
+      DEVICE_ID=$(echo "$DEVICES" | jq -r ".devices[] | select(.hostname == \"$HOSTNAME\") | .id" | head -1)
+    fi
+    if [ -n "$DEVICE_ID" ]; then
+      echo "🗑️  Deleting existing node '$HOSTNAME' (ID: $DEVICE_ID)..."
+      curl -sf -X DELETE -u "${API_KEY}:" "https://api.tailscale.com/api/v2/device/${DEVICE_ID}"
+      echo "✅ Existing node deleted."
+    else
+      echo "ℹ️  No existing node found with hostname '$HOSTNAME'."
+    fi
+  fi
+else
+  echo "ℹ️  No API key provided, skipping hostname conflict check."
+fi
+
+# Step 7: Log in using the provided auth key
 echo "🚀 Connecting to Tailscale using the specified auth key..."
-sudo tailscale up --authkey="$AUTH_KEY" --reset --hostname=ap-ollama-tailscale
+sudo tailscale up --authkey="$AUTH_KEY" --reset --hostname="$HOSTNAME"
 
 echo "🎉 Tailscale setup complete via userspace mode."
