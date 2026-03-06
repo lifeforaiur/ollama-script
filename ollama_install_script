@@ -25,4 +25,4 @@ sudo systemctl daemon-reload
 sudo systemctl restart ollama
 sleep 10
 
-ollama pull hf.co/unsloth/Qwen3.5-35B-A3B-GGUF:Q4_K_M
+ollama pull qwen3.5:35b
