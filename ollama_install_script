@@ -1,10 +1,17 @@
 #!/bin/bash
 set -e  # Exit on error
 
-sudo apt update && \
-sudo apt install -y pciutils nano htop nvtop zstd && \
-curl https://ollama.ai/install.sh | sh && \
-sudo mkdir -p /etc/systemd/system/ollama.service.d && \
+sudo apt update
+sudo apt install -y pciutils nano htop nvtop zstd
+# Install ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Verify the binary was actually installed — install.sh can silently fail over non-TTY SSH
+if [ ! -f /usr/local/bin/ollama ]; then
+  echo "ollama binary missing after install.sh — retrying..."
+  curl -fsSL https://ollama.ai/install.sh | sh
+fi
+sudo mkdir -p /etc/systemd/system/ollama.service.d
 sudo sh -c 'cat > /etc/systemd/system/ollama.service.d/environment.conf << '\''EOF'\''
 [Service]
 Environment="OLLAMA_HOST=0.0.0.0:11434"
@@ -14,7 +21,8 @@ Environment="OLLAMA_NUM_GPU=-1"
 Environment="OLLAMA_GPU_MEMORY_FRACTION=0.9"
 Environment="OLLAMA_TENSOR_PARALLEL=true"
 EOF'
-sudo systemctl daemon-reload && \
-sudo systemctl restart ollama && \
-sleep 3 && \
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+sleep 10
+
 ollama pull hf.co/unsloth/Qwen3.5-35B-A3B-GGUF:Q4_K_M
