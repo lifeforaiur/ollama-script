@@ -26,5 +26,5 @@ sudo systemctl restart ollama
 sleep 10
 
 ollama pull qwen3.5:35b
-ollama pull qwen3.5:9b
-ollama pull qwen3.5:2b
+ollama pull GLM-4.7-Flash:latest
+ollama pull Qwen3:latest
